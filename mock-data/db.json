@@ -1,0 +1,29 @@
+{
+    "taxSlabs": [
+      {
+        "id": 1,
+        "name": "Slab A",
+        "incomeRange": "0-250000",
+        "taxRate": 0
+      },
+      {
+        "id": 2,
+        "name": "Slab B",
+        "incomeRange": "250001-500000",
+        "taxRate": 5
+      },
+      {
+        "id": 3,
+        "name": "Slab C",
+        "incomeRange": "500001-1000000",
+        "taxRate": 20
+      },
+      {
+        "id": 4,
+        "name": "Slab D",
+        "incomeRange": "1000001-∞",
+        "taxRate": 30
+      }
+    ]
+  }
+  
