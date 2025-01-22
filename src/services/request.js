@@ -1,19 +1,22 @@
-import axios from 'axios';
+import { fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 
-const instance = axios.create({
-  baseURL: '/api',
-});
-
-// Add a request interceptor to include token
-instance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
+export const RtkBaseQuery = retry(
+  fetchBaseQuery({
+    baseUrl: "http://localhost:8080/api",
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
+  }),
+  { maxRetries: 2}
 );
 
-export default instance;
+export const customBackOff = async () => {
+  await new Promise((resolve) => {
+    setTimeout(resolve, 2000);
+  });
+};
+

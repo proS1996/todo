@@ -22,7 +22,6 @@ const Sidebar = ({ notes, onAddNote, onViewAll, onSelectNote }) => {
           height: "100%"
         }}
       >
-        {/* View All Notes Button at the top */}
         <Button
           variant="contained"
           color="secondary"
@@ -30,7 +29,7 @@ const Sidebar = ({ notes, onAddNote, onViewAll, onSelectNote }) => {
           onClick={onViewAll}
           sx={{
             mb: 2,
-            backgroundColor: "#444", // Lighter grey, similar to sidebar
+            backgroundColor: "#444",
             color: "white",
             "&:hover": { backgroundColor: "#616161" }
           }}
@@ -38,7 +37,6 @@ const Sidebar = ({ notes, onAddNote, onViewAll, onSelectNote }) => {
           View All Notes
         </Button>
 
-        {/* Add Note Button */}
         <Button
           variant="contained"
           color="secondary"
@@ -46,7 +44,7 @@ const Sidebar = ({ notes, onAddNote, onViewAll, onSelectNote }) => {
           onClick={onAddNote}
           sx={{
             mb: 2,
-            backgroundColor: "#444", // Lighter grey, similar to sidebar
+            backgroundColor: "#444",
             color: "white",
             "&:hover": { backgroundColor: "#616161" }
           }}
@@ -54,17 +52,15 @@ const Sidebar = ({ notes, onAddNote, onViewAll, onSelectNote }) => {
           Add Note +
         </Button>
 
-        {/* Divider */}
         <Divider sx={{ backgroundColor: "#616161", mb: 2 }} />
 
-        {/* Saved Notes */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           {notes?.map((note, index) => (
             <Button
               key={index}
               variant="contained"
               sx={{
-                backgroundColor: "#555", // Darker grey for the chip background
+                backgroundColor: "#555",
                 color: "white",
                 "&:hover": {
                   backgroundColor: "#666"

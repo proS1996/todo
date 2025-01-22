@@ -1,21 +1,19 @@
-import jwt from 'jsonwebtoken';
-import logger from '../utils/logger.js';
+import jwt from "jsonwebtoken";
+import logger from "../utils/logger.js";
 
 const authenticate = (req, res, next) => {
-  const authHeader = req.headers.authorization; // Extract Authorization header
-  console.log("🚀 ~ authenticate ~ authHeader:", authHeader); // Debugging
+  const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     logger.warn(`Unauthorized access attempt from IP: ${req.ip}`);
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const token = authHeader.split(' ')[1]; // Extract token from "Bearer <token>"
-  console.log("🚀 ~ authenticate ~ token:", token); // Debugging
+  const token = authHeader.split(" ")[1];
 
   if (!token) {
     logger.warn(`No token provided in Bearer header from IP: ${req.ip}`);
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
   try {
@@ -24,8 +22,10 @@ const authenticate = (req, res, next) => {
     logger.info(`User ${req.userId} authenticated successfully`);
     next();
   } catch (error) {
-    logger.error(`Failed to authenticate user from IP: ${req.ip}, Error: ${error.message}`);
-    res.status(403).json({ message: 'Forbidden' });
+    logger.error(
+      `Failed to authenticate user from IP: ${req.ip}, Error: ${error.message}`
+    );
+    res.status(403).json({ message: "Forbidden" });
   }
 };
 

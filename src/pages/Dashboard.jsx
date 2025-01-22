@@ -3,12 +3,23 @@ import { Box } from "@mui/material";
 import Sidebar from "./Sidebar";
 import Notes from "./Notes";
 
+import {
+  useCreateTodoMutation,
+  useGetTodosQuery,
+  useUpdateTodoMutation,
+  useDeleteTodoMutation
+} from "../services/rtk-query/todoApi";
+
 const Dashboard = () => {
-  const [notes, setNotes] = useState([]); // Store notes
-  const [isAdding, setIsAdding] = useState(false); // Toggle note input
-  const [currentNote, setCurrentNote] = useState({ title: "", content: "" }); // Current note object
-  const [activeNoteIndex, setActiveNoteIndex] = useState(null); // Index of the selected note
-  const [viewAll, setViewAll] = useState(false); // Toggle to view all notes
+  const { data: notes = [], refetch } = useGetTodosQuery();
+  const [createTodo] = useCreateTodoMutation();
+  const [updateTodo] = useUpdateTodoMutation();
+  const [deleteTodo] = useDeleteTodoMutation();
+
+  const [isAdding, setIsAdding] = useState(false);
+  const [currentNote, setCurrentNote] = useState({ title: "", content: "" });
+  const [activeNoteIndex, setActiveNoteIndex] = useState(null);
+  const [viewAll, setViewAll] = useState(true);
 
   const handleAddNote = () => {
     setIsAdding(true);
@@ -17,30 +28,42 @@ const Dashboard = () => {
     setCurrentNote({ title: "", content: "" });
   };
 
-  const handleSaveNote = () => {
+  const handleSaveNote = async () => {
     if (currentNote.title.trim() || currentNote.content.trim()) {
-      if (activeNoteIndex !== null) {
-        // Update existing note
-        const updatedNotes = [...notes];
-        updatedNotes[activeNoteIndex] = currentNote;
-        setNotes(updatedNotes);
-      } else {
-        // Add new note
-        setNotes([...notes, currentNote]);
+      try {
+        if (activeNoteIndex !== null) {
+          const noteToUpdate = notes[activeNoteIndex];
+          await updateTodo({
+            id: noteToUpdate._id,
+            title: currentNote.title,
+            content: currentNote.content
+          }).unwrap();
+        } else {
+          await createTodo({
+            title: currentNote.title,
+            content: currentNote.content
+          }).unwrap();
+        }
+        refetch();
+      } catch (error) {
+        console.error("Error saving note:", error);
       }
-      setCurrentNote({ title: "", content: "" });
     }
     setIsAdding(false);
   };
 
-  const handleDeleteNote = () => {
+  const handleDeleteNote = async (id) => {
+    let noteToDelete = id;
     if (activeNoteIndex !== null) {
-      const updatedNotes = notes.filter((_, index) => index !== activeNoteIndex);
-      setNotes(updatedNotes);
-      setCurrentNote({ title: "", content: "" });
-      setActiveNoteIndex(null);
-      setIsAdding(false);
+      noteToDelete = notes[activeNoteIndex]._id;
     }
+    try {
+      await deleteTodo(noteToDelete).unwrap();
+      refetch();
+    } catch (error) {
+      console.error("Error deleting note:", error);
+    }
+    handleViewAll();
   };
 
   const handleViewAll = () => {
@@ -64,7 +87,14 @@ const Dashboard = () => {
         onViewAll={handleViewAll}
         onSelectNote={handleSelectNote}
       />
-      <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", padding: 3 }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          padding: 3
+        }}
+      >
         <Notes
           viewAll={viewAll}
           notes={notes}
@@ -73,9 +103,9 @@ const Dashboard = () => {
           onTitleChange={(title) =>
             setCurrentNote((prev) => ({ ...prev, title }))
           }
-          onContentChange={(content) =>{
+          onContentChange={(content) =>
             setCurrentNote((prev) => ({ ...prev, content }))
-          }}
+          }
           onSave={handleSaveNote}
           onDelete={handleDeleteNote}
         />
