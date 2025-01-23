@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Box } from "@mui/material";
 import Sidebar from "./Sidebar";
 import Notes from "./Notes";
@@ -10,6 +10,8 @@ import {
   useDeleteTodoMutation
 } from "../services/rtk-query/todoApi";
 
+const initialNoteState = { title: "", content: "" };
+
 const Dashboard = () => {
   const { data: notes = [], refetch } = useGetTodosQuery();
   const [createTodo] = useCreateTodoMutation();
@@ -17,95 +19,95 @@ const Dashboard = () => {
   const [deleteTodo] = useDeleteTodoMutation();
 
   const [isAdding, setIsAdding] = useState(false);
-  const [currentNote, setCurrentNote] = useState({ title: "", content: "" });
+  const [currentNote, setCurrentNote] = useState(initialNoteState);
   const [activeNoteIndex, setActiveNoteIndex] = useState(null);
   const [viewAll, setViewAll] = useState(true);
 
-  const handleAddNote = () => {
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleAddNote = useCallback(() => {
     setIsAdding(true);
     setActiveNoteIndex(null);
     setViewAll(false);
-    setCurrentNote({ title: "", content: "" });
-  };
+    setCurrentNote(initialNoteState);
+  }, []);
 
-  const handleSaveNote = async () => {
-    if (currentNote.title.trim() || currentNote.content.trim()) {
-      try {
-        if (activeNoteIndex !== null) {
-          const noteToUpdate = notes[activeNoteIndex];
-          await updateTodo({
-            id: noteToUpdate._id,
-            title: currentNote.title,
-            content: currentNote.content
-          }).unwrap();
-        } else {
-          await createTodo({
-            title: currentNote.title,
-            content: currentNote.content
-          }).unwrap();
-        }
-        refetch();
-      } catch (error) {
-        console.error("Error saving note:", error);
-      }
-    }
-    setIsAdding(false);
-  };
+  const handleSaveNote = useCallback(async () => {
+    const { title, content } = currentNote;
+    if (!title.trim() && !content.trim()) return;
 
-  const handleDeleteNote = async (id) => {
-    let noteToDelete = id;
-    if (activeNoteIndex !== null) {
-      noteToDelete = notes[activeNoteIndex]._id;
-    }
     try {
-      await deleteTodo(noteToDelete).unwrap();
+      if (activeNoteIndex !== null) {
+        const { _id: id } = notes[activeNoteIndex];
+        await updateTodo({ id, title, content }).unwrap();
+      } else {
+        await createTodo({ title, content }).unwrap();
+      }
       refetch();
+      setIsAdding(false);
+    } catch (error) {
+      console.error("Error saving note:", error);
+    }
+  }, [activeNoteIndex, currentNote, createTodo, updateTodo, notes, refetch]);
+
+  const handleDeleteNote = useCallback(async (id) => {
+    try {
+      const noteId = id ?? notes[activeNoteIndex]?._id;
+      if (!noteId) return;
+      
+      await deleteTodo(noteId).unwrap();
+      refetch();
+      handleViewAll();
     } catch (error) {
       console.error("Error deleting note:", error);
     }
-    handleViewAll();
-  };
+  }, [deleteTodo, notes, activeNoteIndex, refetch]);
 
-  const handleViewAll = () => {
+  const handleViewAll = useCallback(() => {
     setViewAll(true);
     setIsAdding(false);
     setActiveNoteIndex(null);
-  };
+  }, []);
 
-  const handleSelectNote = (index) => {
+  const handleSelectNote = useCallback((index) => {
     setActiveNoteIndex(index);
     setCurrentNote(notes[index]);
     setIsAdding(true);
     setViewAll(false);
-  };
+  }, [notes]);
+
+  const handleNoteChange = useCallback((field) => (value) => {
+    setCurrentNote(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  // Memoize the layout style to prevent unnecessary recalculations
+  const layoutStyle = useMemo(() => ({
+    display: "flex",
+    height: `calc(100% - 16px)`
+  }), []);
+
+  const contentStyle = useMemo(() => ({
+    flexGrow: 1,
+    display: "flex",
+    flexDirection: "column",
+    padding: 3
+  }), []);
 
   return (
-    <Box sx={{ display: "flex", height: `calc(100% - 16px)` }}>
+    <Box sx={layoutStyle}>
       <Sidebar
         notes={notes}
         onAddNote={handleAddNote}
         onViewAll={handleViewAll}
         onSelectNote={handleSelectNote}
       />
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          padding: 3
-        }}
-      >
+      <Box sx={contentStyle}>
         <Notes
           viewAll={viewAll}
           notes={notes}
           isAdding={isAdding}
           currentNote={currentNote}
-          onTitleChange={(title) =>
-            setCurrentNote((prev) => ({ ...prev, title }))
-          }
-          onContentChange={(content) =>
-            setCurrentNote((prev) => ({ ...prev, content }))
-          }
+          onTitleChange={handleNoteChange('title')}
+          onContentChange={handleNoteChange('content')}
           onSave={handleSaveNote}
           onDelete={handleDeleteNote}
         />

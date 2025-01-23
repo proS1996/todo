@@ -44,8 +44,10 @@ app.use(
   })
 );
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {});
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
 // Export the app for serverless deployment
 export default app;
