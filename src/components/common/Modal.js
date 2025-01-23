@@ -1,4 +1,3 @@
-import React from 'react';
 import { Modal as MuiModal, Box } from '@mui/material';
 
 const Modal = ({ open, handleClose, children }) => {
