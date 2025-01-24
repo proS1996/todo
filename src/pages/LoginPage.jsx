@@ -11,25 +11,14 @@ import * as Yup from "yup";
 import { useLoginMutation } from "../services/rtk-query/authApi";
 import FormTextField from "../components/form/FormTextField";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export const FormContainer = styled(Grid)(({ theme }) => ({
-  justifyContent: "center",
-  alignItems: "center",
-  // background: "red",
-  padding: "40px",
-  [theme.breakpoints.down("md")]: {
-    padding: "20px"
-  },
-  [theme.breakpoints.down("sm")]: {
-    padding: "8px"
-  }
-}));
 export const FormBg = styled(Grid)(({ theme }) => ({
   borderRadius: "15px",
   padding: theme.spacing(8, 6),
   justifyContent: "center",
   alignItems: "center",
-  background: "lightgrey",
+  background: "#F2F2F2",
   [theme.breakpoints.down("md")]: {
     marginTop: theme.spacing(6),
     padding: theme.spacing(6)
@@ -41,6 +30,7 @@ export const FormBg = styled(Grid)(({ theme }) => ({
 }));
 
 const LoginPage = () => {
+  const navigate=useNavigate()
   const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading, isError, error }] = useLoginMutation();
 
@@ -56,8 +46,9 @@ const LoginPage = () => {
     onSubmit: async (values) => {
       try {
         const response = await login(values).unwrap();
-        console.log("🚀 ~ onSubmit: ~ response:", response);
-        alert("Login Successful");
+        if(response){
+          navigate("/")
+        }
       } catch (err) {
         console.error("Login failed: ", err);
         alert("Login failed");
@@ -71,12 +62,13 @@ const LoginPage = () => {
 
   return (
     <Container maxWidth="xs">
-      <FormContainer container>
         <FormBg item container gap={2}>
           <Typography variant="h5" gutterBottom>
             Login
           </Typography>
           <form onSubmit={formik.handleSubmit}>
+            <Grid container spacing={3}>
+
             <FormTextField
               isFullWidth
               name="username"
@@ -87,6 +79,7 @@ const LoginPage = () => {
               errorMsg={formik.touched.username ? formik.errors.username : ""}
               onBlur={formik.handleBlur("username")}
             />
+            
             <FormTextField
               placeholder={"enter your password here"}
               onBlur={formik.handleBlur}
@@ -106,6 +99,7 @@ const LoginPage = () => {
                 ></IconButton>
               }
             />
+            </Grid>
             <Button
               type="submit"
               variant="contained"
@@ -123,7 +117,6 @@ const LoginPage = () => {
             )}
           </form>
         </FormBg>
-      </FormContainer>
     </Container>
   );
 };

@@ -3,13 +3,7 @@ import { fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
 export const RtkBaseQuery = retry(
   fetchBaseQuery({
     baseUrl: "http://localhost:8080/api",
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
+   credentials:"include"
   }),
   { maxRetries: 2}
 );

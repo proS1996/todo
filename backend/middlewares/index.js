@@ -5,9 +5,13 @@ import morgan from "morgan";
 import expressWinston from "express-winston";
 import winston from "winston";
 
-
 const middlewares = (app) => {
-  app.use(cors());
+  app.use(
+    cors({
+      origin: "http://localhost:5173", // React app origin
+      credentials: true // Allow cookies to be sent
+    })
+  );
   app.use(cookieParser());
   app.use(express.json());
   app.use(morgan("dev"));
@@ -22,7 +26,7 @@ const middlewares = (app) => {
       })
     ),
     msg: "HTTP {{req.method}} {{req.url}} {{res.statusCode}} {{res.responseTime}}ms",
-    meta: false,
+    meta: false
   };
 
   app.use(expressWinston.logger(loggerOptions));

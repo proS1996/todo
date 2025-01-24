@@ -8,7 +8,6 @@ import {
 } from "@mui/material";
 import { useState, cloneElement, memo } from "react";
 import PropTypes from "prop-types";
-import { useTheme } from "@mui/material/styles";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
@@ -43,7 +42,6 @@ const FormTextField = ({
   showCharacterCount = false
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const { palette } = useTheme();
 
   const customInputProps = {
     ...inputProps,
@@ -71,7 +69,7 @@ const FormTextField = ({
   };
 
   return (
-    <Grid item xs={12} sx={{ position: "relative", my: "0.3rem" }}>
+    <Grid item xs={12} sx={{ position: "relative", my: "0.3rem" }} spacing={2}>
       <Stack spacing={1}>
         <TextField
           ref={inputRef}

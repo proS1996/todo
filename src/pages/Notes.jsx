@@ -1,6 +1,16 @@
-import { Box, Typography, Paper, TextField, IconButton } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Paper,
+  TextField,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useLogoutMutation } from "../services/rtk-query/authApi";
+import { useNavigate } from "react-router-dom";
 
 const Notes = ({
   viewAll,
@@ -10,10 +20,43 @@ const Notes = ({
   onTitleChange,
   onContentChange,
   onSave,
-  onDelete
+  onDelete,
 }) => {
+  const navigate=useNavigate()
+  const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
+
+  const handleLogout = async () => {
+    try {
+     const response= await logout().unwrap();
+      if(response){
+        navigate("/login")
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+      alert("Failed to logout");
+    }
+  };
+
   return (
     <Box sx={{ padding: 2, flexGrow: 1 }}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: 16,
+          right: 16,
+        }}
+      >
+        <Tooltip title="Logout">
+          <IconButton
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            sx={{color:"primary.main"}}
+          >
+            <LogoutIcon />
+          </IconButton>
+        </Tooltip>
+      </Box>
+
       {isAdding ? (
         <Box sx={{ display: "flex", flexDirection: "column" }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
@@ -28,8 +71,8 @@ const Notes = ({
                 backgroundColor: "#f5f5f5",
                 "& .MuiOutlinedInput-root": {
                   "& fieldset": { borderColor: "#ccc" },
-                  "&:hover fieldset": { borderColor: "#888" }
-                }
+                  "&:hover fieldset": { borderColor: "#888" },
+                },
               }}
             />
             <Box sx={{ display: "flex", alignItems: "center", ml: 2 }}>
@@ -54,8 +97,8 @@ const Notes = ({
               backgroundColor: "#f5f5f5",
               "& .MuiOutlinedInput-root": {
                 "& fieldset": { borderColor: "#ccc" },
-                "&:hover fieldset": { borderColor: "#888" }
-              }
+                "&:hover fieldset": { borderColor: "#888" },
+              },
             }}
           />
         </Box>
@@ -67,7 +110,7 @@ const Notes = ({
                 display: "flex",
                 flexWrap: "wrap",
                 gap: 2,
-                justifyContent: "center"
+                justifyContent: "center",
               }}
             >
               {notes.map((note, index) => (
@@ -79,7 +122,7 @@ const Notes = ({
                     padding: 2,
                     width: "300px",
                     backgroundColor: "#f9f9f9",
-                    borderRadius: 2
+                    borderRadius: 2,
                   }}
                 >
                   {/* Delete Icon */}
@@ -89,7 +132,7 @@ const Notes = ({
                     sx={{
                       position: "absolute",
                       top: 8,
-                      right: 8
+                      right: 8,
                     }}
                   >
                     <DeleteIcon />
