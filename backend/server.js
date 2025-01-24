@@ -1,53 +1,28 @@
 import express from "express";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import morgan from "morgan";
 import dotenv from "dotenv";
-import expressWinston from "express-winston";
 import connectDB from "./config/db.js";
-import authRoutes from "./routes/authRoutes.js";
-import todoRoutes from "./routes/todoRoutes.js";
-import winston from "winston";
+import middlewares from "./middlewares/index.js";
+import routes from "./routes/index.js";
 
 dotenv.config();
 
-const app = express();
-app.use(cors());
-app.use(cookieParser());
+const startServer = async () => {
+  try {
+    await connectDB();
 
-app.use(express.json());
-app.use(morgan("dev"));
+    const app = express();
 
-app.use(
-  expressWinston.logger({
-    transports: [new winston.transports.Console()],
-    format: winston.format.json(),
-    meta: true,
-    msg: "HTTP {{req.method}} {{req.url}}",
-    colorize: true
-  })
-);
+    middlewares(app);
 
-connectDB();
+    routes(app);
 
-app.use((req, res, next) => {
-  next();
-});
+    const PORT = process.env.PORT || 8080;
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (error) {
+    console.error("Error starting server:", error.message);
+    // eslint-disable-next-line no-undef
+    process.exit(1);
+  }
+};
 
-app.use("/api/auth", authRoutes);
-app.use("/api/todos", todoRoutes);
-
-app.use(
-  expressWinston.errorLogger({
-    transports: [new winston.transports.Console()],
-    format: winston.format.json()
-  })
-);
-
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-// Export the app for serverless deployment
-export default app;
+startServer();

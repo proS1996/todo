@@ -1,31 +1,19 @@
-import jwt from "jsonwebtoken";
-import logger from "../utils/logger.js";
+import jwt from 'jsonwebtoken';
 
 const authenticate = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    logger.warn(`Unauthorized access attempt from IP: ${req.ip}`);
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const token = authHeader.split(" ")[1];
+  const token = req.cookies.token; // Get the token from cookies
+  console.log("🚀 ~ authenticate ~ token:", token)
 
   if (!token) {
-    logger.warn(`No token provided in Bearer header from IP: ${req.ip}`);
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: 'No token, no access' });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.id;
-    logger.info(`User ${req.userId} authenticated successfully`);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify token
+    req.user = decoded; // Attach user info to the request object
     next();
   } catch (error) {
-    logger.error(
-      `Failed to authenticate user from IP: ${req.ip}, Error: ${error.message}`
-    );
-    res.status(403).json({ message: "Forbidden" });
+    res.status(401).json({ message: 'Invalid token' });
   }
 };
 
