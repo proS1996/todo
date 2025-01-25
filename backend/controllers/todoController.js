@@ -53,7 +53,7 @@ export const updateTodo = async (req, res) => {
     }
 
     logger.info(`Todo updated: ${title} (ID: ${id}) by user ${req.user.id}`);
-    res.status(200).json(todo);
+    res.status(200).json({ data: todo });
   } catch (error) {
     logger.error(
       `Error updating todo (ID: ${id}) by user ${req.user.id}: ${error.message}`
@@ -77,7 +77,7 @@ export const deleteTodo = async (req, res) => {
     }
 
     logger.info(`Todo deleted: ID ${id} by user ${req.user.id}`);
-    res.status(200).json({ message: "Todo deleted successfully" });
+    res.status(200).json({ data: todo });
   } catch (error) {
     logger.error(
       `Error deleting todo (ID: ${id}) by user ${req.user.id}: ${error.message}`

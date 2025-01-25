@@ -11,7 +11,7 @@ import {
 } from "../services/rtk-query/todoApi";
 
 const Dashboard = () => {
-  const { data: notes = [], refetch } = useGetTodosQuery();
+  const { data: notes = [],refetch } = useGetTodosQuery();
   const [createTodo] = useCreateTodoMutation();
   const [updateTodo] = useUpdateTodoMutation();
   const [deleteTodo] = useDeleteTodoMutation();
@@ -38,13 +38,13 @@ const Dashboard = () => {
             title: currentNote.title,
             content: currentNote.content
           }).unwrap();
+          refetch()
         } else {
           await createTodo({
             title: currentNote.title,
             content: currentNote.content
           }).unwrap();
         }
-        refetch();
       } catch (error) {
         console.error("Error saving note:", error);
       }
@@ -59,7 +59,6 @@ const Dashboard = () => {
     }
     try {
       await deleteTodo(noteToDelete).unwrap();
-      refetch();
     } catch (error) {
       console.error("Error deleting note:", error);
     }

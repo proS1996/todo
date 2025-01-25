@@ -25,6 +25,7 @@ export const todoApi = createApi({
         method: "PUT",
         body: data
       }),
+      transformResponse: (res) => res?.data,
       async onQueryStarted({ id, ...patch }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           todoApi.util.updateQueryData('getTodos', undefined, (draft) => {
@@ -35,7 +36,15 @@ export const todoApi = createApi({
           })
         );
         try {
-          await queryFulfilled;
+          const { data } = await queryFulfilled;
+          dispatch(
+            todoApi.util.updateQueryData('getTodos', undefined, (draft) => {
+              const todo = draft.find(todo => todo.id === id);
+              if (todo) {
+                Object.assign(todo, data);
+              }
+            })
+          );
         } catch {
           patchResult.undo();
         }
@@ -46,10 +55,11 @@ export const todoApi = createApi({
         url: `/todos/${id}`,
         method: "DELETE"
       }),
+      transformResponse: (res) => res?.data,
       async onQueryStarted(id, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           todoApi.util.updateQueryData('getTodos', undefined, (draft) => {
-            const index = draft.findIndex(todo => todo.id === id);
+            const index = draft.findIndex(todo => todo._id === id);
             if (index !== -1) draft.splice(index, 1);
           })
         );
