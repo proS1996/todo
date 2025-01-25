@@ -1,15 +1,18 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useGetUserQuery } from "../services/rtk-query/authApi";
 
 const ProtectedRoute = ({ children }) => {
-  const { data, isError, isLoading } = useGetUserQuery();
+  const location = useLocation();
+  const { data: user, isError, isLoading } = useGetUserQuery(undefined, {
+    refetchOnMountOrArgChange: true
+  });
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (isError || !data) {
-    return <Navigate to="/login" />;
+  if (isError || !user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return children;

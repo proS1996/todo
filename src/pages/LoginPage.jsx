@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useLoginMutation } from "../services/rtk-query/authApi";
+import { useGetUserQuery, useLoginMutation } from "../services/rtk-query/authApi";
 import FormTextField from "../components/form/FormTextField";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -30,9 +30,10 @@ export const FormBg = styled(Grid)(({ theme }) => ({
 }));
 
 const LoginPage = () => {
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading, isError, error }] = useLoginMutation();
+  const { refetch } = useGetUserQuery();
 
   const formik = useFormik({
     initialValues: {
@@ -46,8 +47,9 @@ const LoginPage = () => {
     onSubmit: async (values) => {
       try {
         const response = await login(values).unwrap();
-        if(response){
-          navigate("/")
+        if (response) {
+          await refetch();
+          navigate("/", { replace: true });
         }
       } catch (err) {
         console.error("Login failed: ", err);
