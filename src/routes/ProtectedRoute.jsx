@@ -3,9 +3,7 @@ import { useGetUserQuery } from "../services/rtk-query/authApi";
 
 const ProtectedRoute = ({ children }) => {
   const location = useLocation();
-  const { data: user, isError, isLoading } = useGetUserQuery(undefined, {
-    refetchOnMountOrArgChange: true
-  });
+  const { data: user, isError, isLoading } = useGetUserQuery();
 
   if (isLoading) {
     return <div>Loading...</div>;

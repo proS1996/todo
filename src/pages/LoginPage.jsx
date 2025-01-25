@@ -11,29 +11,24 @@ import * as Yup from "yup";
 import { useGetUserQuery, useLoginMutation } from "../services/rtk-query/authApi";
 import FormTextField from "../components/form/FormTextField";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+// import { LoadingButton } from "@mui/lab";
 
 export const FormBg = styled(Grid)(({ theme }) => ({
   borderRadius: "15px",
   padding: theme.spacing(8, 6),
   justifyContent: "center",
   alignItems: "center",
-  background: "#F2F2F2",
-  [theme.breakpoints.down("md")]: {
-    marginTop: theme.spacing(6),
-    padding: theme.spacing(6)
-  },
-  [theme.breakpoints.down("sm")]: {
-    marginTop: theme.spacing(0),
-    padding: theme.spacing(2.2)
-  }
+  background: "#F2F2F2"
 }));
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading, isError, error }] = useLoginMutation();
   const { refetch } = useGetUserQuery();
+  const from = location.state?.from?.pathname || "/";
 
   const formik = useFormik({
     initialValues: {
@@ -49,11 +44,10 @@ const LoginPage = () => {
         const response = await login(values).unwrap();
         if (response) {
           await refetch();
-          navigate("/", { replace: true });
+          navigate(from, { replace: true });
         }
       } catch (err) {
         console.error("Login failed: ", err);
-        alert("Login failed");
       }
     }
   });
@@ -70,18 +64,16 @@ const LoginPage = () => {
           </Typography>
           <form onSubmit={formik.handleSubmit}>
             <Grid container spacing={3}>
-
             <FormTextField
               isFullWidth
               name="username"
               label="Username"
-              placeholder={"please enter user name!"}
+              placeholder={"enter user name!"}
               value={formik.values.username}
               onChange={formik.handleChange("username")}
               errorMsg={formik.touched.username ? formik.errors.username : ""}
               onBlur={formik.handleBlur("username")}
             />
-            
             <FormTextField
               placeholder={"enter your password here"}
               onBlur={formik.handleBlur}

@@ -106,9 +106,9 @@ const FormTextField = ({
                       { onClick: () => setShowPassword(!showPassword) },
                       name.toLowerCase().includes("password") ? (
                         showPassword ? (
-                          <VisibilityIcon color="success" />
-                        ) : (
                           <VisibilityOffIcon />
+                        ) : (
+                          <VisibilityIcon />
                         )
                       ) : (
                         endIcon
